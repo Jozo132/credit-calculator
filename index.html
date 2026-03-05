@@ -44,11 +44,16 @@
 
     header {
       text-align: center;
-      margin-bottom: 16px;
-      padding-top: 8px;
+      margin-bottom: 8px;
+      padding: 6px 8px 4px;
+      position: sticky;
+      top: 0;
+      z-index: 110;
+      background: var(--bg);
+      background-image: radial-gradient(ellipse at 50% 0%, rgba(0,180,216,0.06) 0%, transparent 60%);
     }
     header h1 {
-      font-size: clamp(1.3rem, 4vw, 1.8rem);
+      font-size: clamp(1.1rem, 3.5vw, 1.5rem);
       font-weight: 800;
       background: linear-gradient(135deg, var(--primary), #38bdf8);
       -webkit-background-clip: text;
@@ -57,15 +62,15 @@
     }
     header p {
       color: var(--text-muted);
-      font-size: 0.82rem;
-      margin-top: 4px;
+      font-size: 0.75rem;
+      margin-top: 2px;
     }
 
     .lang-bar {
       display: flex;
       justify-content: center;
       gap: 4px;
-      margin-top: 10px;
+      margin-top: 6px;
     }
     .lang-btn {
       background: rgba(255,255,255,0.04);
@@ -152,43 +157,6 @@
       color: var(--primary);
     }
 
-    input[type="range"] {
-      -webkit-appearance: none;
-      width: 100%;
-      height: 5px;
-      background: var(--border);
-      border-radius: 3px;
-      outline: none;
-      cursor: pointer;
-      touch-action: pan-x;
-    }
-    input[type="range"]::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      width: 24px;
-      height: 24px;
-      border-radius: 50%;
-      background: var(--primary);
-      cursor: pointer;
-      box-shadow: 0 0 10px var(--primary-glow), 0 2px 6px rgba(0,0,0,0.4);
-      border: 2px solid rgba(255,255,255,0.15);
-    }
-    input[type="range"]::-moz-range-thumb {
-      width: 24px;
-      height: 24px;
-      border-radius: 50%;
-      background: var(--primary);
-      cursor: pointer;
-      border: 2px solid rgba(255,255,255,0.15);
-      box-shadow: 0 0 10px var(--primary-glow), 0 2px 6px rgba(0,0,0,0.4);
-    }
-
-    .range-limits {
-      display: flex;
-      justify-content: space-between;
-      font-size: 0.7rem;
-      color: var(--text-muted);
-      margin-top: 4px;
-    }
 
     .number-input-wrap {
       margin-top: 6px;
@@ -220,48 +188,59 @@
       background: rgba(15,23,42,0.9);
     }
 
-    .results-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-    }
-    .result-item {
-      background: var(--primary-light);
-      border-radius: 10px;
-      padding: 10px 8px;
-      text-align: center;
-    }
-    .result-item.accent { background: var(--accent-light); }
-    .result-item.highlight {
-      grid-column: span 2;
+    .results-hero {
       background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      border-radius: 10px;
+      padding: 12px 14px;
+      text-align: center;
       color: #fff;
       box-shadow: var(--glow);
+      margin-bottom: 10px;
     }
-    .result-item .ri-label {
+    .results-hero .hero-label {
       font-size: 0.62rem;
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.05em;
-      color: var(--text-muted);
+      color: rgba(255,255,255,.7);
       margin-bottom: 2px;
     }
-    .result-item.highlight .ri-label { color: rgba(255,255,255,.7); }
-    .result-item .ri-value {
-      font-size: 1.05rem;
+    .results-hero .hero-value {
+      font-size: 1.35rem;
+      font-weight: 700;
+    }
+    .results-hero .hero-sub {
+      font-size: 0.78rem;
+      color: rgba(255,255,255,.6);
+      margin-top: 4px;
+    }
+    .results-hero .hero-sub span { color: rgba(255,255,255,.9); font-weight: 600; }
+
+    .results-list {
+      display: flex;
+      flex-direction: column;
+    }
+    .result-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 4px;
+      border-bottom: 1px solid var(--card-border);
+    }
+    .result-row:last-child { border-bottom: none; }
+    .result-row .rr-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+    .result-row .rr-value {
+      font-size: 0.95rem;
       font-weight: 700;
       color: var(--primary);
+      text-align: right;
     }
-    .result-item.accent .ri-value { color: var(--accent); }
-    .result-item.highlight .ri-value {
-      font-size: 1.35rem;
-      color: #fff;
-    }
-    .result-item.insurance {
-      grid-column: span 2;
-      background: var(--insurance-bg);
-    }
-    .result-item.insurance .ri-value { color: var(--accent); }
+    .result-row.danger { background: var(--danger-light); border-radius: 8px; padding: 8px; margin: 4px -4px; }
+    .result-row.danger .rr-value { color: var(--danger); }
 
     .toggle-btn {
       display: flex;
@@ -357,30 +336,33 @@
   <!-- Results (sticky, before inputs) -->
   <div class="card results-card">
     <h2 data-i18n="resultsOverview">Results Overview</h2>
-    <div class="results-grid">
-      <div class="result-item highlight">
-        <div class="ri-label" data-i18n="monthlyPayment">Monthly Payment</div>
-        <div class="ri-value" id="res-monthly">&mdash;</div>
+
+    <div class="results-hero">
+      <div class="hero-label" data-i18n="monthlyPayment">Monthly Payment</div>
+      <div class="hero-value" id="res-monthly">&mdash;</div>
+      <div class="hero-sub"><span data-i18n="monthlyTotal">Monthly Total (with Insurance)</span>: <span id="res-monthly-insurance">&mdash;</span></div>
+    </div>
+
+    <div class="results-list">
+      <div class="result-row">
+        <span class="rr-label" data-i18n="totalRepaid">Total Repaid</span>
+        <span class="rr-value" id="res-total">&mdash;</span>
       </div>
-      <div class="result-item insurance">
-        <div class="ri-label" data-i18n="monthlyTotal">Monthly Total (with Insurance)</div>
-        <div class="ri-value" id="res-monthly-insurance">&mdash;</div>
+      <div class="result-row">
+        <span class="rr-label" data-i18n="totalInterest">Total Interest</span>
+        <span class="rr-value" id="res-interest">&mdash;</span>
       </div>
-      <div class="result-item">
-        <div class="ri-label" data-i18n="totalRepaid">Total Repaid</div>
-        <div class="ri-value" id="res-total">&mdash;</div>
+      <div class="result-row danger">
+        <span class="rr-label" data-i18n="totalCostWithFees">Total Cost (with Fees)</span>
+        <span class="rr-value" id="res-total-fees">&mdash;</span>
       </div>
-      <div class="result-item">
-        <div class="ri-label" data-i18n="totalInterest">Total Interest</div>
-        <div class="ri-value" id="res-interest">&mdash;</div>
+      <div class="result-row">
+        <span class="rr-label" data-i18n="numPayments">No. of Payments</span>
+        <span class="rr-value" id="res-npayments">&mdash;</span>
       </div>
-      <div class="result-item accent">
-        <div class="ri-label" data-i18n="numPayments">No. of Payments</div>
-        <div class="ri-value" id="res-npayments">&mdash;</div>
-      </div>
-      <div class="result-item accent">
-        <div class="ri-label" data-i18n="downPayment">Down Payment (20%)</div>
-        <div class="ri-value" id="res-firstpayment">&mdash;</div>
+      <div class="result-row">
+        <span class="rr-label" data-i18n="downPayment">Down Payment (20%)</span>
+        <span class="rr-value" id="res-firstpayment">&mdash;</span>
       </div>
     </div>
   </div>
@@ -394,8 +376,7 @@
         <span class="field-label" data-i18n="loanAmount">Loan Amount</span>
         <span class="field-value" id="disp-principal">&euro;100,000</span>
       </div>
-      <input type="range" id="range-principal" min="1000" max="1000000" step="1000" value="100000" />
-      <div class="range-limits"><span>&euro;1,000</span><span>&euro;1,000,000</span></div>
+      <input type="range" style="display:none" id="range-principal" min="1000" max="1000000" step="1000" value="100000" />
       <div class="number-input-wrap">
         <label for="num-principal">&euro;</label>
         <input type="number" id="num-principal" min="1000" max="1000000" step="1000" value="100000" />
@@ -407,8 +388,7 @@
         <span class="field-label" data-i18n="annualRate">Annual Interest Rate</span>
         <span class="field-value" id="disp-rate">3.05%</span>
       </div>
-      <input type="range" id="range-rate" min="0" max="30" step="0.05" value="3.05" />
-      <div class="range-limits"><span>0%</span><span>30%</span></div>
+      <input type="range" style="display:none" id="range-rate" min="0" max="30" step="0.05" value="3.05" />
       <div class="number-input-wrap">
         <label for="num-rate">%</label>
         <input type="number" id="num-rate" min="0" max="30" step="0.05" value="3.05" />
@@ -420,8 +400,7 @@
         <span class="field-label" data-i18n="loanTerm">Loan Term</span>
         <span class="field-value" id="disp-years">15 yrs</span>
       </div>
-      <input type="range" id="range-years" min="1" max="40" step="1" value="15" />
-      <div class="range-limits"><span>1 <span data-i18n="yr">yr</span></span><span>40 <span data-i18n="yrs">yrs</span></span></div>
+      <input type="range" style="display:none" id="range-years" min="1" max="40" step="1" value="15" />
       <div class="number-input-wrap">
         <label for="num-years" data-i18n="yrs">yrs</label>
         <input type="number" id="num-years" min="1" max="40" step="1" value="15" />
@@ -433,8 +412,7 @@
         <span class="field-label" data-i18n="monthlyInsurance">Monthly Insurance Cost</span>
         <span class="field-value" id="disp-insurance">&euro;50.00</span>
       </div>
-      <input type="range" id="range-insurance" min="0" max="500" step="5" value="50" />
-      <div class="range-limits"><span>&euro;0</span><span>&euro;500</span></div>
+      <input type="range" style="display:none" id="range-insurance" min="0" max="500" step="5" value="50" />
       <div class="number-input-wrap">
         <label for="num-insurance">&euro;</label>
         <input type="number" id="num-insurance" min="0" max="500" step="5" value="50" />
@@ -470,6 +448,8 @@
 
 <footer>
   <span data-i18n="footer">Results are estimates only. Actual loan terms may differ.</span> &copy; <span id="yr"></span>
+  <br />
+  <span data-i18n="authorLabel">Author:</span> Jože Vovk
 </footer>
 
 <script>
@@ -490,6 +470,7 @@
       monthlyTotal: 'Monthly Total (with Insurance)',
       totalRepaid: 'Total Repaid',
       totalInterest: 'Total Interest',
+      totalCostWithFees: 'Total Cost (with Fees)',
       numPayments: 'No. of Payments',
       downPayment: 'Down Payment (20%)',
       amortSchedule: 'Amortization Schedule',
@@ -500,7 +481,8 @@
       footer: 'Results are estimates only. Actual loan terms may differ.',
       payments: 'payments',
       yr: 'yr',
-      yrs: 'yrs'
+      yrs: 'yrs',
+      authorLabel: 'Author'
     },
     sl: {
       title: 'Kreditni Kalkulator',
@@ -515,6 +497,7 @@
       monthlyTotal: 'Mesečni Obrok (z Zavarovanjem)',
       totalRepaid: 'Skupaj Odplačano',
       totalInterest: 'Skupne Obresti',
+      totalCostWithFees: 'Skupni Stroški (z Dajatvami)',
       numPayments: 'Št. Obrokov',
       downPayment: 'Polog (20%)',
       amortSchedule: 'Amortizacijski Načrt',
@@ -525,7 +508,8 @@
       footer: 'Rezultati so samo ocene. Dejanski pogoji posojila se lahko razlikujejo.',
       payments: 'obrokov',
       yr: 'leto',
-      yrs: 'let'
+      yrs: 'let',
+      authorLabel: 'Avtor'
     },
     de: {
       title: 'Kreditrechner',
@@ -540,6 +524,7 @@
       monthlyTotal: 'Monatlich Gesamt (mit Versicherung)',
       totalRepaid: 'Gesamtrückzahlung',
       totalInterest: 'Gesamtzinsen',
+      totalCostWithFees: 'Gesamtkosten (mit Gebühren)',
       numPayments: 'Anzahl der Raten',
       downPayment: 'Anzahlung (20%)',
       amortSchedule: 'Tilgungsplan',
@@ -550,7 +535,8 @@
       footer: 'Die Ergebnisse sind nur Schätzungen. Die tatsächlichen Kreditbedingungen können abweichen.',
       payments: 'Raten',
       yr: 'Jahr',
-      yrs: 'Jahre'
+      yrs: 'Jahre',
+      authorLabel: 'Autor'
     }
   };
 
@@ -643,6 +629,7 @@
   var resMonthlyIns  = document.getElementById('res-monthly-insurance');
   var resTotal       = document.getElementById('res-total');
   var resInterest    = document.getElementById('res-interest');
+  var resTotalFees   = document.getElementById('res-total-fees');
   var resNPayments   = document.getElementById('res-npayments');
   var resFirst       = document.getElementById('res-firstpayment');
 
@@ -700,6 +687,11 @@
       resMonthlyIns.textContent = fmt(res.m + insurance);
       resTotal.textContent      = fmt(res.t);
       resInterest.textContent   = fmt(res.i);
+
+      var totalWithFees = res.t + (insurance * res.n);
+      var overpayPct = ((totalWithFees - principal) / principal * 100).toFixed(1);
+      resTotalFees.textContent = fmt(totalWithFees) + ' (+' + overpayPct + '%)';
+
       resNPayments.textContent  = res.n + ' ' + t.payments;
       resFirst.textContent      = fmt(res.p);
 
@@ -708,7 +700,8 @@
       errorMsg.textContent = e.message;
       errorMsg.classList.add('visible');
       resMonthly.textContent = resTotal.textContent = resInterest.textContent =
-        resNPayments.textContent = resFirst.textContent = resMonthlyIns.textContent = '\u2014';
+        resNPayments.textContent = resFirst.textContent = resMonthlyIns.textContent =
+        resTotalFees.textContent = '\u2014';
     }
   }
 
