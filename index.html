@@ -8,21 +8,22 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --primary: #2563eb;
-      --primary-dark: #1d4ed8;
-      --primary-light: #dbeafe;
+      --primary: #3b82f6;
+      --primary-dark: #2563eb;
+      --primary-light: #1e293b;
       --accent: #10b981;
-      --accent-light: #d1fae5;
+      --accent-light: #162a2a;
       --danger: #ef4444;
-      --danger-light: #fee2e2;
-      --text: #1e293b;
-      --text-muted: #64748b;
-      --bg: #f1f5f9;
-      --card: #ffffff;
-      --border: #e2e8f0;
+      --danger-light: #3b1c1c;
+      --text: #e2e8f0;
+      --text-muted: #94a3b8;
+      --bg: #0f172a;
+      --card: #1e293b;
+      --border: #334155;
       --radius: 12px;
-      --shadow: 0 2px 8px rgba(0,0,0,0.08);
-      --shadow-md: 0 4px 16px rgba(0,0,0,0.12);
+      --insurance-bg: #1a2e1a;
+      --shadow: 0 2px 8px rgba(0,0,0,0.3);
+      --shadow-md: 0 4px 16px rgba(0,0,0,0.4);
     }
 
     body {
@@ -155,7 +156,7 @@
     }
     .number-input-wrap input[type="number"]:focus {
       border-color: var(--primary);
-      background: #fff;
+      background: var(--card);
     }
 
     /* ---- results ---- */
@@ -195,6 +196,11 @@
       font-size: 1.6rem;
       color: #fff;
     }
+    .result-item.insurance {
+      grid-column: span 2;
+      background: var(--insurance-bg);
+    }
+    .result-item.insurance .ri-value { color: var(--accent); }
 
     /* ---- schedule toggle ---- */
     .schedule-section {
@@ -252,7 +258,7 @@
     .total-row td {
       font-weight: 700;
       background: var(--primary-light);
-      color: var(--primary-dark);
+      color: var(--primary);
       border-top: 2px solid var(--primary);
     }
 
@@ -328,6 +334,19 @@
       </div>
     </div>
 
+    <div class="field">
+      <div class="field-header">
+        <span class="field-label">Monthly Insurance Cost</span>
+        <span class="field-value" id="disp-insurance">€50.00</span>
+      </div>
+      <input type="range" id="range-insurance" min="0" max="500" step="5" value="50" />
+      <div class="range-limits"><span>€0</span><span>€500</span></div>
+      <div class="number-input-wrap">
+        <label for="num-insurance">€</label>
+        <input type="number" id="num-insurance" min="0" max="500" step="5" value="50" />
+      </div>
+    </div>
+
     <div id="error-msg" class="error-msg">Invalid input. Please check the values.</div>
   </div>
 
@@ -338,6 +357,10 @@
       <div class="result-item highlight">
         <div class="ri-label">Monthly Payment</div>
         <div class="ri-value" id="res-monthly">—</div>
+      </div>
+      <div class="result-item insurance">
+        <div class="ri-label">Monthly Total (with Insurance)</div>
+        <div class="ri-value" id="res-monthly-insurance">—</div>
       </div>
       <div class="result-item">
         <div class="ri-label">Total Repaid</div>
@@ -444,15 +467,19 @@
   var rangePrincipal = document.getElementById('range-principal');
   var rangeRate      = document.getElementById('range-rate');
   var rangeYears     = document.getElementById('range-years');
+  var rangeInsurance = document.getElementById('range-insurance');
   var numPrincipal   = document.getElementById('num-principal');
   var numRate        = document.getElementById('num-rate');
   var numYears       = document.getElementById('num-years');
+  var numInsurance   = document.getElementById('num-insurance');
 
   var dispPrincipal  = document.getElementById('disp-principal');
   var dispRate       = document.getElementById('disp-rate');
   var dispYears      = document.getElementById('disp-years');
+  var dispInsurance  = document.getElementById('disp-insurance');
 
   var resMonthly     = document.getElementById('res-monthly');
+  var resMonthlyIns  = document.getElementById('res-monthly-insurance');
   var resTotal       = document.getElementById('res-total');
   var resInterest    = document.getElementById('res-interest');
   var resNPayments   = document.getElementById('res-npayments');
@@ -470,17 +497,20 @@
     var principal = parseFloat(numPrincipal.value);
     var rate      = parseFloat(numRate.value);
     var years     = parseFloat(numYears.value);
+    var insurance = parseFloat(numInsurance.value) || 0;
 
     /* keep displays in sync */
     dispPrincipal.textContent = '€' + (+principal || 0).toLocaleString('en-US');
     dispRate.textContent      = (+rate || 0).toFixed(2) + '%';
     dispYears.textContent     = (+years || 0) + ' yr' + (years === 1 ? '' : 's');
+    dispInsurance.textContent = fmt(insurance);
 
     try {
       var res = loanTotals(principal, rate, years);
       errorMsg.classList.remove('visible');
 
       resMonthly.textContent   = fmt(res.m);
+      resMonthlyIns.textContent = fmt(res.m + insurance);
       resTotal.textContent     = fmt(res.t);
       resInterest.textContent  = fmt(res.i);
       resNPayments.textContent = res.n + ' payments';
@@ -492,7 +522,7 @@
       errorMsg.textContent = e.message;
       errorMsg.classList.add('visible');
       resMonthly.textContent = resTotal.textContent = resInterest.textContent =
-        resNPayments.textContent = resFirst.textContent = '—';
+        resNPayments.textContent = resFirst.textContent = resMonthlyIns.textContent = '—';
     }
   }
 
@@ -537,10 +567,12 @@
   rangePrincipal.addEventListener('input', function () { syncFromRange(rangePrincipal, numPrincipal); });
   rangeRate.addEventListener('input',      function () { syncFromRange(rangeRate, numRate); });
   rangeYears.addEventListener('input',     function () { syncFromRange(rangeYears, numYears); });
+  rangeInsurance.addEventListener('input', function () { syncFromRange(rangeInsurance, numInsurance); });
 
   numPrincipal.addEventListener('input', function () { syncFromNumber(numPrincipal, rangePrincipal); });
   numRate.addEventListener('input',      function () { syncFromNumber(numRate, rangeRate); });
   numYears.addEventListener('input',     function () { syncFromNumber(numYears, rangeYears); });
+  numInsurance.addEventListener('input', function () { syncFromNumber(numInsurance, rangeInsurance); });
 
   /* ---- schedule toggle ---- */
   toggleBtn.addEventListener('click', function () {
