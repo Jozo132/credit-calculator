@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Credit Calculator</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --primary-light: #dbeafe;
+      --accent: #10b981;
+      --accent-light: #d1fae5;
+      --danger: #ef4444;
+      --danger-light: #fee2e2;
+      --text: #1e293b;
+      --text-muted: #64748b;
+      --bg: #f1f5f9;
+      --card: #ffffff;
+      --border: #e2e8f0;
+      --radius: 12px;
+      --shadow: 0 2px 8px rgba(0,0,0,0.08);
+      --shadow-md: 0 4px 16px rgba(0,0,0,0.12);
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 16px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    header h1 {
+      font-size: clamp(1.4rem, 4vw, 2rem);
+      font-weight: 700;
+      color: var(--primary);
+    }
+    header p {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      margin-top: 4px;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 20px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    @media (min-width: 640px) {
+      .layout { grid-template-columns: 1fr 1fr; }
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 20px;
+    }
+    .card h2 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 16px;
+    }
+
+    /* ---- inputs ---- */
+    .field { margin-bottom: 20px; }
+    .field:last-child { margin-bottom: 0; }
+
+    .field-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 8px;
+    }
+    .field-label {
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text);
+    }
+    .field-value {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    input[type="range"] {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 6px;
+      background: var(--border);
+      border-radius: 3px;
+      outline: none;
+      cursor: pointer;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--primary);
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(37,99,235,0.4);
+    }
+    input[type="range"]::-moz-range-thumb {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--primary);
+      cursor: pointer;
+      border: none;
+      box-shadow: 0 2px 6px rgba(37,99,235,0.4);
+    }
+
+    .range-limits {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .number-input-wrap {
+      margin-top: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .number-input-wrap label {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+    .number-input-wrap input[type="number"] {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.95rem;
+      color: var(--text);
+      outline: none;
+      transition: border-color .2s;
+      background: var(--bg);
+    }
+    .number-input-wrap input[type="number"]:focus {
+      border-color: var(--primary);
+      background: #fff;
+    }
+
+    /* ---- results ---- */
+    .results-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .result-item {
+      background: var(--primary-light);
+      border-radius: 10px;
+      padding: 14px 12px;
+      text-align: center;
+    }
+    .result-item.accent { background: var(--accent-light); }
+    .result-item.highlight {
+      grid-column: span 2;
+      background: var(--primary);
+      color: #fff;
+    }
+    .result-item .ri-label {
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+    .result-item.highlight .ri-label { color: rgba(255,255,255,.75); }
+    .result-item .ri-value {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--primary);
+    }
+    .result-item.accent .ri-value { color: var(--accent); }
+    .result-item.highlight .ri-value {
+      font-size: 1.6rem;
+      color: #fff;
+    }
+
+    /* ---- schedule toggle ---- */
+    .schedule-section {
+      grid-column: 1 / -1;
+    }
+    .toggle-btn {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 0;
+      padding: 0;
+    }
+    .toggle-btn .arrow { transition: transform .3s; font-size: 1.1rem; }
+    .toggle-btn.open .arrow { transform: rotate(180deg); }
+
+    .schedule-wrap {
+      display: none;
+      overflow-x: auto;
+      margin-top: 16px;
+    }
+    .schedule-wrap.visible { display: block; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+    }
+    thead th {
+      background: var(--primary);
+      color: #fff;
+      padding: 8px 10px;
+      text-align: right;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    thead th:first-child { text-align: center; border-radius: 8px 0 0 0; }
+    thead th:last-child { border-radius: 0 8px 0 0; }
+    tbody tr:nth-child(even) { background: var(--bg); }
+    tbody td {
+      padding: 7px 10px;
+      text-align: right;
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    tbody td:first-child { text-align: center; color: var(--text-muted); font-weight: 500; }
+    .total-row td {
+      font-weight: 700;
+      background: var(--primary-light);
+      color: var(--primary-dark);
+      border-top: 2px solid var(--primary);
+    }
+
+    .error-msg {
+      background: var(--danger-light);
+      color: var(--danger);
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      display: none;
+      margin-top: 12px;
+    }
+    .error-msg.visible { display: block; }
+
+    footer {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.78rem;
+      margin-top: 28px;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>💳 Credit Calculator</h1>
+  <p>Estimate your loan cost and monthly repayments</p>
+</header>
+
+<div class="layout">
+
+  <!-- Inputs -->
+  <div class="card">
+    <h2>Loan Parameters</h2>
+
+    <div class="field">
+      <div class="field-header">
+        <span class="field-label">Loan Amount</span>
+        <span class="field-value" id="disp-principal">€100,000</span>
+      </div>
+      <input type="range" id="range-principal" min="1000" max="1000000" step="1000" value="100000" />
+      <div class="range-limits"><span>€1,000</span><span>€1,000,000</span></div>
+      <div class="number-input-wrap">
+        <label for="num-principal">€</label>
+        <input type="number" id="num-principal" min="1000" max="1000000" step="1000" value="100000" />
+      </div>
+    </div>
+
+    <div class="field">
+      <div class="field-header">
+        <span class="field-label">Annual Interest Rate</span>
+        <span class="field-value" id="disp-rate">3.05%</span>
+      </div>
+      <input type="range" id="range-rate" min="0" max="30" step="0.05" value="3.05" />
+      <div class="range-limits"><span>0%</span><span>30%</span></div>
+      <div class="number-input-wrap">
+        <label for="num-rate">%</label>
+        <input type="number" id="num-rate" min="0" max="30" step="0.05" value="3.05" />
+      </div>
+    </div>
+
+    <div class="field">
+      <div class="field-header">
+        <span class="field-label">Loan Term</span>
+        <span class="field-value" id="disp-years">15 yrs</span>
+      </div>
+      <input type="range" id="range-years" min="1" max="40" step="1" value="15" />
+      <div class="range-limits"><span>1 yr</span><span>40 yrs</span></div>
+      <div class="number-input-wrap">
+        <label for="num-years">yrs</label>
+        <input type="number" id="num-years" min="1" max="40" step="1" value="15" />
+      </div>
+    </div>
+
+    <div id="error-msg" class="error-msg">Invalid input. Please check the values.</div>
+  </div>
+
+  <!-- Results -->
+  <div class="card">
+    <h2>Results Overview</h2>
+    <div class="results-grid">
+      <div class="result-item highlight">
+        <div class="ri-label">Monthly Payment</div>
+        <div class="ri-value" id="res-monthly">—</div>
+      </div>
+      <div class="result-item">
+        <div class="ri-label">Total Repaid</div>
+        <div class="ri-value" id="res-total">—</div>
+      </div>
+      <div class="result-item">
+        <div class="ri-label">Total Interest</div>
+        <div class="ri-value" id="res-interest">—</div>
+      </div>
+      <div class="result-item accent">
+        <div class="ri-label">No. of Payments</div>
+        <div class="ri-value" id="res-npayments">—</div>
+      </div>
+      <div class="result-item accent">
+        <div class="ri-label">Down Payment (20%)</div>
+        <div class="ri-value" id="res-firstpayment">—</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Amortization Schedule -->
+  <div class="card schedule-section">
+    <button class="toggle-btn" id="toggle-schedule" type="button">
+      Amortization Schedule
+      <span class="arrow">▼</span>
+    </button>
+    <div class="schedule-wrap" id="schedule-wrap">
+      <table id="schedule-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Payment</th>
+            <th>Principal</th>
+            <th>Interest</th>
+            <th>Balance</th>
+          </tr>
+        </thead>
+        <tbody id="schedule-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  Results are estimates only. Actual loan terms may differ. &copy; <span id="yr"></span>
+</footer>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ---- core calculation ---- */
+  function loanTotals(principal, annualRatePct, years) {
+    if (!isFinite(principal) || principal <= 0) throw new Error('principal must be > 0');
+    if (!isFinite(annualRatePct) || annualRatePct < 0) throw new Error('annualRatePct must be >= 0');
+    if (!isFinite(years) || years <= 0) throw new Error('years must be > 0');
+
+    var nPayments = Math.round(years * 12);
+    var r = (annualRatePct / 100) / 12;
+    var monthlyPayment;
+
+    if (r === 0) {
+      monthlyPayment = principal / nPayments;
+    } else {
+      var pow = Math.pow(1 + r, nPayments);
+      monthlyPayment = principal * (r * pow) / (pow - 1);
+    }
+
+    var totalRepaid = monthlyPayment * nPayments;
+    var totalInterest = totalRepaid - principal;
+    var twentyPctUpfront = totalRepaid * 0.2; // 20% of total repaid, paid beforehand
+
+    return {
+      m: +monthlyPayment.toFixed(2),
+      t: +totalRepaid.toFixed(2),
+      i: +totalInterest.toFixed(2),
+      n: nPayments,
+      p: +twentyPctUpfront.toFixed(2)
+    };
+  }
+
+  var FINAL_BALANCE_TOLERANCE = 0.02;
+  function buildSchedule(principal, annualRatePct, nPayments, monthlyPayment) {
+    var r = (annualRatePct / 100) / 12;
+    var rows = [];
+    var balance = principal;
+    for (var k = 1; k <= nPayments; k++) {
+      var interest = +(balance * r).toFixed(2);
+      var princ = +(monthlyPayment - interest).toFixed(2);
+      balance = +(balance - princ).toFixed(2);
+      if (k === nPayments && Math.abs(balance) < FINAL_BALANCE_TOLERANCE) balance = 0;
+      rows.push({ k: k, payment: monthlyPayment, principal: princ, interest: interest, balance: balance < 0 ? 0 : balance });
+    }
+    return rows;
+  }
+
+  /* ---- formatting ---- */
+  function fmt(n) {
+    return '€' + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  /* ---- DOM refs ---- */
+  var rangePrincipal = document.getElementById('range-principal');
+  var rangeRate      = document.getElementById('range-rate');
+  var rangeYears     = document.getElementById('range-years');
+  var numPrincipal   = document.getElementById('num-principal');
+  var numRate        = document.getElementById('num-rate');
+  var numYears       = document.getElementById('num-years');
+
+  var dispPrincipal  = document.getElementById('disp-principal');
+  var dispRate       = document.getElementById('disp-rate');
+  var dispYears      = document.getElementById('disp-years');
+
+  var resMonthly     = document.getElementById('res-monthly');
+  var resTotal       = document.getElementById('res-total');
+  var resInterest    = document.getElementById('res-interest');
+  var resNPayments   = document.getElementById('res-npayments');
+  var resFirst       = document.getElementById('res-firstpayment');
+
+  var errorMsg       = document.getElementById('error-msg');
+  var scheduleBody   = document.getElementById('schedule-body');
+  var toggleBtn      = document.getElementById('toggle-schedule');
+  var scheduleWrap   = document.getElementById('schedule-wrap');
+
+  document.getElementById('yr').textContent = new Date().getFullYear();
+
+  /* ---- update ---- */
+  function update() {
+    var principal = parseFloat(numPrincipal.value);
+    var rate      = parseFloat(numRate.value);
+    var years     = parseFloat(numYears.value);
+
+    /* keep displays in sync */
+    dispPrincipal.textContent = '€' + (+principal || 0).toLocaleString('en-US');
+    dispRate.textContent      = (+rate || 0).toFixed(2) + '%';
+    dispYears.textContent     = (+years || 0) + ' yr' + (years === 1 ? '' : 's');
+
+    try {
+      var res = loanTotals(principal, rate, years);
+      errorMsg.classList.remove('visible');
+
+      resMonthly.textContent   = fmt(res.m);
+      resTotal.textContent     = fmt(res.t);
+      resInterest.textContent  = fmt(res.i);
+      resNPayments.textContent = res.n + ' payments';
+      resFirst.textContent     = fmt(res.p);
+
+      /* rebuild schedule if visible */
+      rebuildSchedule(principal, rate, res.n, res.m);
+    } catch (e) {
+      errorMsg.textContent = e.message;
+      errorMsg.classList.add('visible');
+      resMonthly.textContent = resTotal.textContent = resInterest.textContent =
+        resNPayments.textContent = resFirst.textContent = '—';
+    }
+  }
+
+  function rebuildSchedule(principal, rate, nPayments, monthly) {
+    var rows = buildSchedule(principal, rate, nPayments, monthly);
+    var html = '';
+    var totalPrinc = 0, totalInterest = 0, totalPayment = 0;
+    for (var i = 0; i < rows.length; i++) {
+      var row = rows[i];
+      totalPrinc    += row.principal;
+      totalInterest += row.interest;
+      totalPayment  += row.payment;
+      html += '<tr><td>' + row.k + '</td>' +
+              '<td>' + fmt(row.payment) + '</td>' +
+              '<td>' + fmt(row.principal) + '</td>' +
+              '<td>' + fmt(row.interest) + '</td>' +
+              '<td>' + fmt(row.balance) + '</td></tr>';
+    }
+    html += '<tr class="total-row"><td>∑</td>' +
+            '<td>' + fmt(+totalPayment.toFixed(2)) + '</td>' +
+            '<td>' + fmt(+totalPrinc.toFixed(2)) + '</td>' +
+            '<td>' + fmt(+totalInterest.toFixed(2)) + '</td>' +
+            '<td>—</td></tr>';
+    scheduleBody.innerHTML = html;
+  }
+
+  /* ---- sync range ↔ number ---- */
+  function syncFromRange(rangeEl, numEl) {
+    numEl.value = rangeEl.value;
+    update();
+  }
+  function syncFromNumber(numEl, rangeEl) {
+    var v = parseFloat(numEl.value);
+    if (!isNaN(v)) {
+      var min = parseFloat(rangeEl.min);
+      var max = parseFloat(rangeEl.max);
+      rangeEl.value = Math.min(max, Math.max(min, v));
+    }
+    update();
+  }
+
+  rangePrincipal.addEventListener('input', function () { syncFromRange(rangePrincipal, numPrincipal); });
+  rangeRate.addEventListener('input',      function () { syncFromRange(rangeRate, numRate); });
+  rangeYears.addEventListener('input',     function () { syncFromRange(rangeYears, numYears); });
+
+  numPrincipal.addEventListener('input', function () { syncFromNumber(numPrincipal, rangePrincipal); });
+  numRate.addEventListener('input',      function () { syncFromNumber(numRate, rangeRate); });
+  numYears.addEventListener('input',     function () { syncFromNumber(numYears, rangeYears); });
+
+  /* ---- schedule toggle ---- */
+  toggleBtn.addEventListener('click', function () {
+    var open = scheduleWrap.classList.toggle('visible');
+    toggleBtn.classList.toggle('open', open);
+  });
+
+  /* ---- init ---- */
+  update();
+}());
+</script>
+</body>
+</html>
