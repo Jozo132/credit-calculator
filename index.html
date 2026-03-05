@@ -345,9 +345,9 @@
   <h1><span class="title-emoji">&#x1F4B3;</span> <span data-i18n="title">Credit Calculator</span></h1>
   <p data-i18n="subtitle">Estimate your loan cost and monthly repayments</p>
   <div class="lang-bar">
-    <button class="lang-btn active" data-lang="en" type="button">EN</button>
-    <button class="lang-btn" data-lang="sl" type="button">SL</button>
-    <button class="lang-btn" data-lang="de" type="button">DE</button>
+    <button class="lang-btn active" data-lang="en" type="button" aria-label="English">EN</button>
+    <button class="lang-btn" data-lang="sl" type="button" aria-label="Slovenščina">SL</button>
+    <button class="lang-btn" data-lang="de" type="button" aria-label="Deutsch">DE</button>
   </div>
 </header>
 
@@ -556,9 +556,9 @@
   var currentLang = 'en';
 
   function applyLanguage(lang) {
-    currentLang = lang;
     var t = translations[lang];
     if (!t) return;
+    currentLang = lang;
     var els = document.querySelectorAll('[data-i18n]');
     for (var i = 0; i < els.length; i++) {
       var key = els[i].getAttribute('data-i18n');
