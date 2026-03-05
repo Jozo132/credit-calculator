@@ -225,6 +225,11 @@
       font-size: 1.35rem;
       color: #fff;
     }
+    .result-item.danger {
+      grid-column: span 2;
+      background: var(--danger-light);
+    }
+    .result-item.danger .ri-value { color: var(--danger); }
     .result-item.insurance {
       grid-column: span 2;
       background: var(--insurance-bg);
@@ -342,6 +347,10 @@
         <div class="ri-label" data-i18n="totalInterest">Total Interest</div>
         <div class="ri-value" id="res-interest">&mdash;</div>
       </div>
+      <div class="result-item danger">
+        <div class="ri-label" data-i18n="totalCostWithFees">Total Cost (with Fees)</div>
+        <div class="ri-value" id="res-total-fees">&mdash;</div>
+      </div>
       <div class="result-item accent">
         <div class="ri-label" data-i18n="numPayments">No. of Payments</div>
         <div class="ri-value" id="res-npayments">&mdash;</div>
@@ -456,6 +465,7 @@
       monthlyTotal: 'Monthly Total (with Insurance)',
       totalRepaid: 'Total Repaid',
       totalInterest: 'Total Interest',
+      totalCostWithFees: 'Total Cost (with Fees)',
       numPayments: 'No. of Payments',
       downPayment: 'Down Payment (20%)',
       amortSchedule: 'Amortization Schedule',
@@ -482,6 +492,7 @@
       monthlyTotal: 'Mesečni Obrok (z Zavarovanjem)',
       totalRepaid: 'Skupaj Odplačano',
       totalInterest: 'Skupne Obresti',
+      totalCostWithFees: 'Skupni Stroški (z Dajatvami)',
       numPayments: 'Št. Obrokov',
       downPayment: 'Polog (20%)',
       amortSchedule: 'Amortizacijski Načrt',
@@ -508,6 +519,7 @@
       monthlyTotal: 'Monatlich Gesamt (mit Versicherung)',
       totalRepaid: 'Gesamtrückzahlung',
       totalInterest: 'Gesamtzinsen',
+      totalCostWithFees: 'Gesamtkosten (mit Gebühren)',
       numPayments: 'Anzahl der Raten',
       downPayment: 'Anzahlung (20%)',
       amortSchedule: 'Tilgungsplan',
@@ -612,6 +624,7 @@
   var resMonthlyIns  = document.getElementById('res-monthly-insurance');
   var resTotal       = document.getElementById('res-total');
   var resInterest    = document.getElementById('res-interest');
+  var resTotalFees   = document.getElementById('res-total-fees');
   var resNPayments   = document.getElementById('res-npayments');
   var resFirst       = document.getElementById('res-firstpayment');
 
@@ -669,6 +682,11 @@
       resMonthlyIns.textContent = fmt(res.m + insurance);
       resTotal.textContent      = fmt(res.t);
       resInterest.textContent   = fmt(res.i);
+
+      var totalWithFees = res.t + (insurance * res.n);
+      var overpayPct = ((totalWithFees - principal) / principal * 100).toFixed(1);
+      resTotalFees.textContent = fmt(totalWithFees) + ' (+' + overpayPct + '%)';
+
       resNPayments.textContent  = res.n + ' ' + t.payments;
       resFirst.textContent      = fmt(res.p);
 
@@ -677,7 +695,8 @@
       errorMsg.textContent = e.message;
       errorMsg.classList.add('visible');
       resMonthly.textContent = resTotal.textContent = resInterest.textContent =
-        resNPayments.textContent = resFirst.textContent = resMonthlyIns.textContent = '\u2014';
+        resNPayments.textContent = resFirst.textContent = resMonthlyIns.textContent =
+        resTotalFees.textContent = '\u2014';
     }
   }
 
